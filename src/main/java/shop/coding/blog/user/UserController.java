@@ -1,10 +1,14 @@
 package shop.coding.blog.user;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+
+import java.sql.PreparedStatement;
 
 @RequiredArgsConstructor // final 붙은 애들에 대한 생성자 생성
 @Controller
@@ -51,8 +55,31 @@ public class UserController {
         return "user/loginForm";
     }
 
+    @PostMapping("/user/update")
+    public String update(UserRequest.UpdateDTO requestDTO, HttpServletRequest request) {
+        // 1. 인증 체크
+        User sessionUser = (User) session.getAttribute("sessionUser");
+        if (sessionUser == null) {
+            return "redirect:/loginForm";
+        }
+
+        request.setAttribute("requestUser", sessionUser);
+        User requestUser = (User) request.getAttribute("requestUser");
+
+        userRepository.update(requestDTO, requestUser.getId());
+        requestUser.setPassword(requestDTO.getPassword());
+        session.setAttribute("sessionUser", requestUser);
+
+        return "redirect:/logout";
+    }
+
     @GetMapping("/user/updateForm")
-    public String updateForm() {
+    public String updateForm(HttpServletRequest request) {
+        User sessionUser = (User) session.getAttribute("sessionUser");
+        if (sessionUser == null) {
+            return "redirect:/loginForm";
+        }
+
         return "user/updateForm";
     }
 
