@@ -1,5 +1,6 @@
 package shop.coding.blog._core.config.security;
 
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -15,6 +16,7 @@ import shop.coding.blog.user.UserRepository;
 public class MyLoginService implements UserDetailsService { // implements UserDetailsService 하는 이유
 
     private final UserRepository userRepository;
+    private final HttpSession session;
 
     // 리턴을 받는 이유는 session 에 setAtribute 하려고! UserDetails 로 형태를 맞춰야 한다.
     // 리턴 값이 있으면 session에 저장 받기 위해서 그런 것 이다.
@@ -30,6 +32,13 @@ public class MyLoginService implements UserDetailsService { // implements UserDe
             return null;
         } else {
             System.out.println("user를 찾았어요");
+
+            // 1. 의존성 주입
+            // 2. 세션에 대한 개념
+            // 3. 로그인 시스템에 대한 개념
+            // 4. 시큐리티 세션이 어디에 저장되어 있는지 알아야한다.
+            // 5. 데이터가 어떻게 저장되는지도 알아야한다.
+            session.setAttribute("sessionUser", user); // 머스태치에서 사용하기 위해 만듬 (머스태치에서만 가져오자!)
             return new MyLoginUser(user);
         }
     }
