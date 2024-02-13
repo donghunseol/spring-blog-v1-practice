@@ -1,13 +1,16 @@
 package shop.coding.blog.board;
 
+import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jdk.jfr.Frequency;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
+import shop.coding.blog._core.config.security.MyLoginUser;
 import shop.coding.blog.user.User;
 import shop.coding.blog.user.UserRepository;
 
@@ -26,9 +29,7 @@ public class BoardController {
         // 부가 로직 - 인증 체크, 권한 체크
         // 1. 인증 체크 (로그인 확인)
         User sessionUser = (User) session.getAttribute("sessionUser");
-        if (sessionUser == null) {
-            return "redirect:/loginForm";
-        }
+
         // 2. 권한 체크 (게시자와 사용자의 권한 확인)
         Board board = boardRepository.findById(id);
         if (board.getUserId() != sessionUser.getId()) {
@@ -50,9 +51,6 @@ public class BoardController {
     public String updateForm(@PathVariable int id, HttpServletRequest request) {
         // 인증 체크
         User loginUser = (User) session.getAttribute("sessionUser");
-        if (loginUser == null) {
-            return "redirect:/loginForm";
-        }
 
         // 권한 체크
         // 모델 위임 (id로 board를 조회) // 조회를 해야 게시글의 주인 ID를 알 수 있다!
@@ -71,9 +69,6 @@ public class BoardController {
     public String delete(@PathVariable int id, HttpServletRequest request) { // body 데이터가 없어서 유효성 검사를 할 필요가 없다!
         // 1. 인증 안되면 나가
         User sessionUser = (User) session.getAttribute("sessionUser");
-        if (sessionUser == null) { // 401
-            return "redirect:/loginForm";
-        }
 
         // 2. 권한 없으면 나가
         Board board = boardRepository.findById(id);
@@ -93,9 +88,6 @@ public class BoardController {
     public String save(BoardRequest.SaveDTO requestDTO, HttpServletRequest request) {
         // 1. 인증 체크
         User sessionUser = (User) session.getAttribute("sessionUser");
-        if (sessionUser == null) {
-            return "redirect:/loginForm";
-        }
 
         // 2. 바디 데이터 확인 및 유효성 검사
         System.out.println(requestDTO);
@@ -113,8 +105,9 @@ public class BoardController {
         return "redirect:/";
     }
 
-    @GetMapping({"/", "/board"})
-    public String index(HttpServletRequest request) {
+    @GetMapping("/")
+    public String index(HttpServletRequest request, @AuthenticationPrincipal MyLoginUser myLoginUser) {
+        System.out.println("로그인 되었나? : " + myLoginUser.getUsername());
         List<Board> boardList = boardRepository.findAll();
         request.setAttribute("boardList", boardList);
 

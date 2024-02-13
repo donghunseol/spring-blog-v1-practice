@@ -18,24 +18,24 @@ public class UserController {
     private final UserRepository userRepository;
     private final HttpSession session;
 
-    @PostMapping("/login")
-    public String login(UserRequest.LoginDTO requestDTO) {
-        System.out.println(requestDTO);
-
-        if (requestDTO.getUsername().length() < 3) {
-            return "error/400"; // ViewResolver 설정이 되어 있음 (앞 경로, 뒤 경로)
-        }
-
-        User user = userRepository.findByUsernameAndPassword(requestDTO);
-
-        if (user == null) { // 조회 안됨 (401)
-            return "error/401";
-        } else {
-            session.setAttribute("sessionUser", user); // 락카에 담음 (StateFul)
-        }
-
-        return "redirect:/";
-    }
+//    @PostMapping("/login")
+//    public String login(UserRequest.LoginDTO requestDTO) {
+//        System.out.println(requestDTO);
+//
+//        if (requestDTO.getUsername().length() < 3) {
+//            return "error/400"; // ViewResolver 설정이 되어 있음 (앞 경로, 뒤 경로)
+//        }
+//
+//        User user = userRepository.findByUsernameAndPassword(requestDTO);
+//
+//        if (user == null) { // 조회 안됨 (401)
+//            return "error/401";
+//        } else {
+//            session.setAttribute("sessionUser", user); // 락카에 담음 (StateFul)
+//        }
+//
+//        return "redirect:/";
+//    }
 
     @PostMapping("/join")
     public String join(UserRequest.JoinDTO requestDTO) {
@@ -66,8 +66,8 @@ public class UserController {
         request.setAttribute("requestUser", sessionUser);
         User requestUser = (User) request.getAttribute("requestUser");
 
-        userRepository.update(requestDTO, requestUser.getId());
-        requestUser.setPassword(requestDTO.getPassword());
+        userRepository.update(requestDTO, requestUser.getId()); // 수정한 값을 저장
+        requestUser.setPassword(requestDTO.getPassword()); // 수정된 데이터를 넣음
         session.setAttribute("sessionUser", requestUser);
 
         return "redirect:/logout";

@@ -33,8 +33,12 @@ public class UserRepository {
         query.setParameter(1, requestDTO.getUsername());
         query.setParameter(2, requestDTO.getPassword());
 
-        User user = (User) query.getSingleResult();
-        return user;
+        try {
+            User user = (User) query.getSingleResult();
+            return user;
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public BoardResponse.DetailDTO findById(int idx) {
@@ -72,5 +76,17 @@ public class UserRepository {
         query.setParameter(1, requestDTO.getPassword());
         query.setParameter(2, id);
         query.executeUpdate();
+    }
+
+    public User findByUsername(String username) { // username 만 하는 이유는 security가 username 만 받아서
+        Query query = em.createNativeQuery("select * from user_tb where username=?", User.class);
+        query.setParameter(1, username);
+
+        try {
+            User user = (User) query.getSingleResult();
+            return user;
+        } catch (Exception e) {
+            return null;
+        }
     }
 }
