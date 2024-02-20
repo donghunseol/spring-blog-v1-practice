@@ -2,6 +2,7 @@ package shop.coding.blog.user;
 
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,10 +22,15 @@ public class UserController {
         System.out.println(requestDTO);
 
         if (requestDTO.getUsername().length() < 3) {
-            return "error/400"; // ViewResolver 설정이 되어 있음 (앞 경로, 뒤 경로)
+            throw new RuntimeException("유저네임 길이가 너무 짧아요");
         }
 
-        User user = userRepository.findByUsernameAndPassword(requestDTO);
+        User user = userRepository.findByUsername(requestDTO.getUsername());
+
+        if (!BCrypt.checkpw(requestDTO.getPassword(), user.getPassword())) {
+            throw new RuntimeException("패스워드가 틀렸습니다");
+        }
+
         session.setAttribute("sessionUser", user); // 락카에 담음 (StateFul)
 
         return "redirect:/";
@@ -33,6 +39,10 @@ public class UserController {
     @PostMapping("/join")
     public String join(UserRequest.JoinDTO requestDTO) {
         System.out.println(requestDTO);
+
+        String rawPassword = requestDTO.getPassword();
+        String encPassword = BCrypt.hashpw(rawPassword, BCrypt.gensalt());
+        requestDTO.setPassword(encPassword);
 
         try {
             userRepository.save(requestDTO); // Request 한 값을 저장 시킨다.
