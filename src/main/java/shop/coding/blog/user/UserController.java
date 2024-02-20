@@ -25,26 +25,21 @@ public class UserController {
         }
 
         User user = userRepository.findByUsernameAndPassword(requestDTO);
-
-        if (user == null) { // 조회 안됨 (401)
-            return "error/401";
-        } else {
-            session.setAttribute("sessionUser", user); // 락카에 담음 (StateFul)
-        }
+        session.setAttribute("sessionUser", user); // 락카에 담음 (StateFul)
 
         return "redirect:/";
     }
 
     @PostMapping("/join")
-    public @ResponseBody String join(UserRequest.JoinDTO requestDTO) {
+    public String join(UserRequest.JoinDTO requestDTO) {
         System.out.println(requestDTO);
 
         try {
             userRepository.save(requestDTO); // Request 한 값을 저장 시킨다.
         } catch (Exception e) {
-            return Script.back("아이디가 중복되었어요");
+            throw new RuntimeException("아이디가 중복되었어요");
         }
-        return Script.href("/loginForm");
+        return "redirect:/loginForm";
     }
 
     @GetMapping("/joinForm")
