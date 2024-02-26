@@ -8,20 +8,81 @@
     <div class="card">
         <div class="card-header"><b>회원가입을 해주세요</b></div>
         <div class="card-body">
-            <form action="/join" method="post" enctype="application/x-www-form-urlencoded">
+            <form action="/join" method="post" enctype="application/x-www-form-urlencoded" onsubmit="return valid()">
                 <div class="mb-3">
-                    <input type="text" class="form-control" placeholder="Enter username" name="username">
+                    <input type="text" class="form-control" placeholder="Enter username" id="username" onkeyup="keyDownCheck(), isBlank()">
+                    <span id="textCheck" class="text-danger"></span>
+                    <button type="button" class="btn" onclick="btnCheck()">ID 중복 체크</button>
                 </div>
                 <div class="mb-3">
-                    <input type="password" class="form-control" placeholder="Enter password" name="password">
+                    <input type="password" class="form-control" placeholder="Enter password" name="password" required="required">
                 </div>
                 <div class="mb-3">
-                    <input type="email" class="form-control" placeholder="Enter email" name="email">
+                    <input type="email" class="form-control" placeholder="Enter email" name="email" required="required">
                 </div>
                 <button type="submit" class="btn btn-primary form-control">회원가입</button>
             </form>
         </div>
     </div>
 </div>
+<script>
+    let isCheck = false;
+    $("#textCheck").html(`아이디를 입력해주세요`);
+
+function isBlank(){
+    let username = $("#username").val();
+
+    if(!username || /^\s*$/.test(username)){
+        alert("공백은 사용할 수 없어요")
+    }else if(/\s/.test(username)) {
+        alert("공백은 사용할 수 없어요")
+    }
+}
+
+    function valid(){
+        if(isCheck === false){
+            alert("아이디 중복 체크가 되지 않았습니다")
+        }
+        return isCheck;
+    }
+
+    function keyDownCheck(){
+        let username = $("#username").val();
+
+        $.ajax({
+            url: "/api/username-same-check?username="+username,
+            type: "get"
+        }).done((res)=>{
+            if(res.body === true){
+                $("#textCheck").html(`아이디가 중복되었습니다`);
+                isCheck = false;
+            } else {
+                $("#textCheck").html(`사용 가능한 아이디입니다`);
+                isCheck = true;
+            }
+        }).fail((res)=>{
+            console.log(res.responseJSON.msg);
+        });
+    }
+
+    function btnCheck(){
+        let username = $("#username").val();
+
+        $.ajax({
+            url: "/api/username-same-check?username="+username,
+            type: "get"
+        }).done((res)=>{
+            if(res.body === true){
+                alert("중복된 아이디가 있습니다")
+                isCheck = false;
+            } else {
+                alert("사용 가능한 아이디입니다")
+                isCheck = true;
+            }
+        }).fail((res)=>{
+            console.log(res.responseJSON.msg);
+        });
+    }
+</script>
 
 {{> /layout/footer}}

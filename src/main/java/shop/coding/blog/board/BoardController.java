@@ -187,6 +187,8 @@ public class BoardController {
 
         request.setAttribute("board", boardDTO);
         request.setAttribute("replyList", replyDTOList);
+        request.setAttribute("isLove", false);
+        request.setAttribute("loveCount", 2);
 
         return "board/detail";
     }

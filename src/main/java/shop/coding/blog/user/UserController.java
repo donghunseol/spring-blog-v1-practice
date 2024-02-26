@@ -5,7 +5,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
+import shop.coding.blog._core.util.ApiUtil;
 import shop.coding.blog._core.util.Script;
 
 @RequiredArgsConstructor // final 붙은 애들에 대한 생성자 생성
@@ -15,6 +17,16 @@ public class UserController {
     // 자바는 final 변수는 반드시 초기화 되어야한다.
     private final UserRepository userRepository;
     private final HttpSession session;
+
+    @GetMapping("/api/username-same-check")
+    public @ResponseBody ApiUtil<?> usernameSameCheck(String username) {
+        User user = userRepository.findByUsername(username);
+        if (user == null) {
+            return new ApiUtil<>(false);
+        } else {
+            return new ApiUtil<>(true);
+        }
+    }
 
     @PostMapping("/login")
     public String login(UserRequest.LoginDTO requestDTO) {
